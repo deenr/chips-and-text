@@ -33,7 +33,3 @@ span {
   padding: 0 10px !important;
   width: 100% !important;
 }
-
-::ng-deep .mat-chip {
-  margin: 0 5px;
-}

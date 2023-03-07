@@ -1,31 +1,22 @@
 <div class="editable">
-  <div
-    #editableDiv
-    class="main"
-    (click)="focusOnLastSpan()"
-    (keyup)="onKeyUp($event)"
-    (blur)="onBlur($event)"
-    contenteditable="true"
-  >
-    <ng-container *ngFor="let item of data; let itemIndex = index">
-      <div *ngIf="item.newLine"></div>
-      <span
-        *ngIf="item.type === 'text'; else chip"
-        (click)="setCursorIndex(itemIndex); $event.stopPropagation()"
-      >
-        {{ item.value }}
-      </span>
-      <ng-template #chip>
-        <mat-chip
-          contenteditable="false"
-          (click)="setCursorIndex(itemIndex + 1, true)"
-        >
-          {{ item.value }}
-          <mat-icon matChipRemove (click)="removeChip(itemIndex)">
-            cancel</mat-icon
+  <div #editableDiv class="main" contenteditable="true">
+    <ng-container *ngFor="let line of data; let lineIndex = index">
+      <div>
+        <ng-container *ngFor="let item of line; let itemIndex = index">
+          <span
+            (click)="setCursorIndex(lineIndex, itemIndex)"
+            *ngIf="item.type === 'text'; else chip"
           >
-        </mat-chip></ng-template
-      >
+            {{ item.value }}
+          </span>
+          <ng-template #chip>
+            <mat-chip contenteditable="false">
+              {{ item.value }}
+              <mat-icon matChipRemove> cancel</mat-icon>
+            </mat-chip></ng-template
+          >
+        </ng-container>
+      </div>
     </ng-container>
   </div>
 </div>

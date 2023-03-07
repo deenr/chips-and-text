@@ -24,16 +24,19 @@ export class EditableWithParsingComponent implements OnInit {
   public data: {
     type: string;
     value: string;
-    newLine?: boolean;
-  }[] = [
-    { type: "text", value: "The tempature of" },
-    { type: "chip", value: "Machine name" },
-    { type: "text", value: "was" },
-    { type: "chip", value: "Actual temperature" },
-    { type: "text", value: "and was too high." },
-    { type: "text", value: "In addition, the RPM was ", newLine: true },
-    { type: "chip", value: "Actual RPM" },
-    { type: "text", value: "which is too fast." },
+  }[][] = [
+    [
+      { type: "text", value: "The temperature of" },
+      { type: "chip", value: "Machine name" },
+      { type: "text", value: "was" },
+      { type: "chip", value: "Actual temperature" },
+      { type: "text", value: "and was too high." },
+    ],
+    [
+      { type: "text", value: "In addition, the RPM was " },
+      { type: "chip", value: "Actual RPM" },
+      { type: "text", value: "which is too fast." },
+    ],
   ];
 
   public value = "";
@@ -51,24 +54,38 @@ export class EditableWithParsingComponent implements OnInit {
   }
 
   public onBlur(event: Event): void {
-    let textToEditIndex = -1;
-    [textToEditIndex] =
-      this.getTextIndexThatWillBeEditedAndGetLengthTillThatText();
-    textToEditIndex =
-      textToEditIndex === -1 ? this.data.length - 1 : textToEditIndex;
-
-    const newText = (event.target as HTMLInputElement).innerText
-      .split(/\n/g)
-      .filter((text: string) => text !== "cancel")[textToEditIndex];
-
-    this.data[textToEditIndex].value = newText;
+    // let textToEditIndex = -1;
+    // [textToEditIndex] =
+    //   this.getTextIndexThatWillBeEditedAndGetLengthTillThatText();
+    // textToEditIndex =
+    //   textToEditIndex === -1 ? this.data.length - 1 : textToEditIndex;
+    // const newText = (event.target as HTMLInputElement).innerText
+    //   .split(/\n/g)
+    //   .filter((text: string) => text !== "cancel")[textToEditIndex];
+    // this.data[textToEditIndex].value = newText;
   }
 
-  public setCursorIndex(index: number, cursorOnChip: boolean = false): void {
+  public setCursorIndex(
+    lineIndex: number,
+    itemIndex: number,
+    cursorOnChip: boolean = false
+  ): void {
     let textLength = 0;
-    for (let i = 0; i < index; i++) {
-      textLength = textLength + this.data[i].value.length;
+
+    for (let i = 0; i < lineIndex; i++) {
+      textLength =
+        textLength +
+        this.data[i]
+          .map((text: { type: string; value: string }) => text.value.length)
+          .reduce(
+            (previousValue: number, currentValue: number) =>
+              previousValue + currentValue
+          );
     }
+    for (let i = 0; i < itemIndex; i++) {
+      textLength = textLength + this.data[lineIndex][i].value.length;
+    }
+
     this.cursorIndex = cursorOnChip
       ? textLength + 1
       : textLength + this.getCaretPosition();
@@ -77,79 +94,79 @@ export class EditableWithParsingComponent implements OnInit {
   }
 
   public removeChip(index: number): void {
-    if (this.data[index - 1]) {
-      this.data[index - 1].value = `${this.data[index - 1]?.value} ${
-        this.data[index + 1]?.value
-      }`;
-      this.data.splice(index + 1, 1);
-    }
-    this.data.splice(index, 1);
-    this.getValue();
+    // if (this.data[index - 1]) {
+    //   this.data[index - 1].value = `${this.data[index - 1]?.value} ${
+    //     this.data[index + 1]?.value
+    //   }`;
+    //   this.data.splice(index + 1, 1);
+    // }
+    // this.data.splice(index, 1);
+    // this.getValue();
   }
 
-  private getTextIndexThatWillBeEditedAndGetLengthTillThatText(): [
-    textIndexToSplit: number,
-    totalLength: number
+  private getTextAndLineIndexAndTotalCharLengthAtCaretPosition(): [
+    textIndex: number,
+    lineIndex: number,
+    totalTextLengthBeforeCaret: number
   ] {
-    let totalTextLength = 0;
-    let textToSplitIndex = -1;
-    for (let i = 0; i < this.data.length; i++) {
-      const text = this.data[i].value;
-      if (this.cursorIndex < totalTextLength + text.length) {
-        textToSplitIndex = i;
-        break;
+    let totalLength = 0;
+    let textIndex = -1;
+    let lineIndex = -1;
+    lineloop: for (let i = 0; i < this.data.length; i++) {
+      for (let j = 0; j < this.data[i].length; j++) {
+        if (this.cursorIndex < totalLength + this.data[i][j].value.length) {
+          lineIndex = i;
+          textIndex = j;
+          break lineloop;
+        }
+        totalLength = totalLength + this.data[i][j].value.length;
       }
-      totalTextLength = totalTextLength + text.length;
     }
-
-    return [textToSplitIndex, totalTextLength];
+    console.log(textIndex, lineIndex, totalLength);
+    return [textIndex, lineIndex, totalLength];
   }
 
   public onOptionSelect(option: string) {
-    const newVariable = `%{${option}}%`;
-
     let totalTextLength = 0;
     let textToSplitIndex = -1;
-    [textToSplitIndex, totalTextLength] =
-      this.getTextIndexThatWillBeEditedAndGetLengthTillThatText();
+    let lineIndex = -1;
+    [textToSplitIndex, lineIndex, totalTextLength] =
+      this.getTextAndLineIndexAndTotalCharLengthAtCaretPosition();
 
     const newChip = { type: "chip", value: option };
-    if (textToSplitIndex !== -1) {
+    if (textToSplitIndex !== -1 && lineIndex !== -1) {
       const indexToSplitText = this.cursorIndex - totalTextLength - 1;
-      const text = this.data[textToSplitIndex].value;
+      const text = this.data[lineIndex][textToSplitIndex].value;
+      console.log(text);
       const firstPart = text.slice(0, indexToSplitText);
       const secondPart = text.slice(indexToSplitText, text.length);
-      this.data[textToSplitIndex].value = firstPart;
-      this.data.splice(textToSplitIndex + 1, 0, newChip);
-      this.data.splice(textToSplitIndex + 2, 0, {
+      this.data[lineIndex][textToSplitIndex].value = firstPart;
+      this.data[lineIndex].splice(textToSplitIndex + 1, 0, newChip);
+      this.data[lineIndex].splice(textToSplitIndex + 2, 0, {
         type: "text",
         value: secondPart,
       });
     } else {
-      this.data.push(newChip);
-      this.data.push({ type: "text", value: "" });
+      this.data[this.data.length - 1].push(newChip);
+      this.data[this.data.length - 1].push({ type: "text", value: "" });
     }
     this.getValue();
-    this.cursorIndex = this.cursorIndex + newVariable.length;
-  }
-
-  public focusOnLastSpan(): void {
-    this.editableDiv.nativeElement.children[
-      this.editableDiv.nativeElement.children.length - 1
-    ].focus();
-    this.setCursorIndex(this.data.length, true);
   }
 
   private getValue(): void {
     this.value = this.data
-      .map((data: { type: string; value: string; newLine?: boolean }) => {
-        if (data.type === "text") {
-          return `${data.newLine ? "\\n" : ""}${data.value}`;
-        } else {
-          return `%{${this.getVariableIdByName(data.value)}}%`;
-        }
+      .map((line: { type: string; value: string }[]) => {
+        return line
+          .map((value: { type: string; value: string }) => {
+            if (value.type === "text") {
+              return value.value;
+            } else {
+              return `%{${this.getVariableIdByName(value.value)}}%`;
+            }
+          })
+          .join(" ");
       })
-      .join(" ");
+      .join("\\n");
   }
 
   private getVariableIdByName(name: string): number | undefined {
