@@ -4,11 +4,11 @@ import {
   OnInit,
   QueryList,
   ViewChild,
-  ViewChildren
+  ViewChildren,
 } from "@angular/core";
 import {
   MatAutocomplete,
-  MatAutocompleteTrigger
+  MatAutocompleteTrigger,
 } from "@angular/material/autocomplete";
 import { MatMenuTrigger } from "@angular/material/menu";
 import { startWith } from "rxjs/operators";
@@ -17,13 +17,12 @@ import { ElementTextContentDirective } from "../content-editable/element-text-co
 @Component({
   selector: "app-basic-input",
   templateUrl: "./basic-input.component.html",
-  styleUrls: ["./basic-input.component.css"]
+  styleUrls: ["./basic-input.component.css"],
 })
 export class BasicInputComponent implements OnInit, AfterViewInit {
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
-  @ViewChildren(ElementTextContentDirective) textElements: QueryList<
-    ElementTextContentDirective
-  >;
+  @ViewChildren(ElementTextContentDirective)
+  textElements: QueryList<ElementTextContentDirective>;
 
   value = "";
 
@@ -37,7 +36,10 @@ export class BasicInputComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {}
 
-  onKeyUp(keyEvent: string, value: string, input: HTMLInputElement) {
+  onKeyUp(event: any, input: HTMLInputElement) {
+    const keyEvent = event.key;
+    const value = event.target?.value;
+
     if (keyEvent === "@") {
       this.trigger.openMenu();
     }
@@ -62,24 +64,24 @@ export class BasicInputComponent implements OnInit, AfterViewInit {
   data = [
     {
       type: "text",
-      value: "This month"
+      value: "This month",
     },
     {
       type: "chip",
-      value: "@jlutz"
+      value: "@jlutz",
     },
     {
       type: "text",
-      value: "and"
+      value: "and",
     },
     {
       type: "chip",
-      value: "@jolewniczak"
+      value: "@jolewniczak",
     },
     {
       type: "text",
-      value: "took PTO"
-    }
+      value: "took PTO",
+    },
   ];
 
   autcompleteData = [
@@ -88,6 +90,6 @@ export class BasicInputComponent implements OnInit, AfterViewInit {
     "@zream",
     "@jkang",
     "@jpu",
-    "@lgatchell"
+    "@lgatchell",
   ];
 }

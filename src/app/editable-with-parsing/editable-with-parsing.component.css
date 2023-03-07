@@ -4,9 +4,8 @@
   padding: 10px 0 10px 10px;
   margin: 20px;
   display: flex;
-  width: 380px;
+  width: fit-content;
   max-width: 100%;
-  /* position: relative; */
 }
 
 input {
@@ -24,7 +23,8 @@ input {
 }
 
 .main {
-  flex-grow: 1;
+  width: 380px;
+  max-width: 100%;
 }
 
 ::ng-deep .mat-menu-panel {

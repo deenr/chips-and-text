@@ -1,6 +1,15 @@
 <mat-form-field>
   <mat-label>Autoname</mat-label>
-  <input #input type="text" autocomplete="off" matInput placeholder="Invoice#..." (keyup)="onKeyUp($event.key, $event.target.value, input)" (change)="onChange($event)" [(ngModel)]="value">
+  <input
+    #input
+    type="text"
+    autocomplete="off"
+    matInput
+    placeholder="Invoice#..."
+    (keyup)="onKeyUp($event, input)"
+    (change)="onChange($event)"
+    [(ngModel)]="value"
+  />
 
   <div matSuffix>
     <mat-divider [vertical]="true"></mat-divider>
@@ -12,12 +21,15 @@
 </mat-form-field>
 
 <mat-menu #menu="matMenu">
-  <button mat-menu-item *ngFor="let option of autcompleteData" (click)="onOptionSelect(option)">{{option}}</button>
+  <button
+    mat-menu-item
+    *ngFor="let option of autcompleteData"
+    (click)="onOptionSelect(option)"
+  >
+    {{ option }}
+  </button>
 </mat-menu>
 
-Output: {{value}}
+Output: {{ value }}
 
-
-
-<mat-chip-list>
-</mat-chip-list>
+<mat-chip-list> </mat-chip-list>
