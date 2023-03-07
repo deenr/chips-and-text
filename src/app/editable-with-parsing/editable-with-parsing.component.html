@@ -1,10 +1,5 @@
 <div class="editable">
-  <div
-    #editable
-    class="main"
-    contenteditable="true"
-    (click)="setCursorIndex(data.length - 1)"
-  >
+  <div #editableDiv class="main" contenteditable="true">
     <ng-container *ngFor="let item of data; let itemIndex = index">
       <span
         *ngIf="item.type === 'text'; else chip"
@@ -15,9 +10,7 @@
       <ng-template #chip>
         <mat-chip
           contenteditable="false"
-          spellcheck="false"
-          tabindex="-1"
-          (focus)="setCursorIndex(itemIndex + 1)"
+          (click)="setCursorIndex(itemIndex + 1, true)"
         >
           {{ item.value }}
           <mat-icon matChipRemove (click)="removeChip(itemIndex)">
@@ -39,14 +32,8 @@
   </button>
 </mat-menu>
 
-<span>Output: {{ value }}</span>
-<br />
-<span>Formatted: {{ formattedValue }}</span>
-<br />
-
 <span>Data: {{ data | json }}</span>
 <br />
-<span>Cursor index: {{ cursorIndex }}</span>
 <br />
 
 <button mat-raised-button [matMenuTriggerFor]="menu">Add variable</button>

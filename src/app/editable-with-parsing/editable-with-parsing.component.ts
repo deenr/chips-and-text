@@ -13,43 +13,49 @@ import { MatMenuTrigger } from "@angular/material/menu";
   styleUrls: ["./editable-with-parsing.component.css"],
 })
 export class EditableWithParsingComponent {
-  @ViewChild("editable") editableContentText: ElementRef;
+  @ViewChild("editableDiv") public editableDiv: ElementRef;
 
-  value = "";
-  formattedValue = "";
-  cursorIndex = 0;
+  public variableData = [
+    { id: 0, name: "Machine name" },
+    { id: 1, name: "Weave product" },
+    { id: 2, name: "Actual temperature" },
+  ];
 
-  showAutocomplete = false;
+  public data: {
+    type: string;
+    value: string;
+  }[] = [
+    { type: "text", value: "The tempature of" },
+    { type: "chip", value: "Machine name" },
+    { type: "text", value: "is too high." },
+    { type: "chip", value: "Machine name" },
+    { type: "text", value: "is too high." },
+  ];
 
-  onKeyUp(index: number): void {
+  private value = "";
+  private cursorIndex = 0;
+
+  public onKeyUp(index: number): void {
     this.data[index].value =
-      this.editableContentText.nativeElement.children[index].innerText;
+      this.editableDiv.nativeElement.children[index].innerText;
     this.setCursorIndex(index);
-    this.getFormattedValue();
+    this.getValue();
   }
 
-  setCursorIndex(index: number): void {
+  public setCursorIndex(index: number, cursorOnChip: boolean = false): void {
     let textLength = 0;
     for (let i = 0; i < index; i++) {
       textLength = textLength + this.data[i].value.length;
     }
-    this.cursorIndex = textLength + this.getCaretPosition();
-    this.getFormattedValue();
+    this.cursorIndex = cursorOnChip
+      ? textLength + 1
+      : textLength + this.getCaretPosition();
+
+    console.log(this.cursorIndex);
+    this.getValue();
   }
 
-  getCaretPosition(): number {
-    const isSupported = typeof window.getSelection !== "undefined";
-    if (isSupported) {
-      const selection = window.getSelection()!;
-      if (selection.rangeCount !== 0) {
-        const range = selection.getRangeAt(0).cloneRange();
-        return range.endOffset;
-      }
-    }
-    return 0;
-  }
-
-  removeChip(index: number): void {
+  public removeChip(index: number): void {
     if (this.data[index - 1]) {
       this.data[index - 1].value = `${this.data[index - 1]?.value} ${
         this.data[index + 1]?.value
@@ -57,10 +63,10 @@ export class EditableWithParsingComponent {
       this.data.splice(index + 1, 1);
     }
     this.data.splice(index, 1);
-    this.getFormattedValue();
+    this.getValue();
   }
 
-  onOptionSelect(option: string) {
+  public onOptionSelect(option: string) {
     const newVariable = `%{${option}}%`;
 
     let totalTextLength = 0;
@@ -76,7 +82,6 @@ export class EditableWithParsingComponent {
 
     const newChip = { type: "chip", value: option };
     if (textToSplitIndex !== -1) {
-      console.log(totalTextLength);
       const indexToSplitText = this.cursorIndex - totalTextLength - 1;
       const text = this.data[textToSplitIndex].value;
       const firstPart = text.slice(0, indexToSplitText);
@@ -92,12 +97,12 @@ export class EditableWithParsingComponent {
       this.data.push(newChip);
       this.data.push({ type: "text", value: "" });
     }
-    this.getFormattedValue();
+    this.getValue();
     this.cursorIndex = this.cursorIndex + newVariable.length;
   }
 
-  public getFormattedValue(): void {
-    this.formattedValue = this.data
+  private getValue(): void {
+    this.value = this.data
       .map((data: { type: string; value: string }) => {
         if (data.type === "text") {
           return data.value;
@@ -108,26 +113,21 @@ export class EditableWithParsingComponent {
       .join(" ");
   }
 
-  public getVariableIdByName(name: string): number | undefined {
+  private getVariableIdByName(name: string): number | undefined {
     return this.variableData.find(
       (variable: { id: number; name: string }) => variable.name === name
     )?.id;
   }
 
-  variableData = [
-    { id: 0, name: "Machine name" },
-    { id: 1, name: "Weave product" },
-    { id: 2, name: "Actual temperature" },
-  ];
-
-  data: {
-    type: string;
-    value: string;
-  }[] = [
-    { type: "text", value: "The tempature of" },
-    { type: "chip", value: "Machine name" },
-    { type: "text", value: "is too high." },
-    { type: "chip", value: "Machine name" },
-    { type: "text", value: "is too high." },
-  ];
+  private getCaretPosition(): number {
+    const isSupported = typeof window.getSelection !== "undefined";
+    if (isSupported) {
+      const selection = window.getSelection()!;
+      if (selection.rangeCount !== 0) {
+        const range = selection.getRangeAt(0).cloneRange();
+        return range.endOffset;
+      }
+    }
+    return 0;
+  }
 }
