@@ -1,0 +1,33 @@
+.test {
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  padding: 10px 0 10px 10px;
+  margin: 20px;
+  display: flex;
+  width: 380px;
+  max-width: 100%;
+  /* position: relative; */
+}
+
+input {
+  border: none;
+  appearance: none;
+}
+
+.more-button {
+  align-self: center;
+}
+
+.end {
+  display: flex;
+  width: 50px;
+}
+
+.main {
+  flex-grow: 1;
+}
+
+::ng-deep .mat-menu-panel {
+  padding: 0 10px !important;
+  width: 100% !important;
+}

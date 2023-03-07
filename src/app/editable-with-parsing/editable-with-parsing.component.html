@@ -1,0 +1,26 @@
+<div class="editable">
+  <div #editable class="main" contenteditable="true" (keyup)="onKeyUp($event.key)">
+  </div>
+
+  <div class="end" spellcheck="false" contenteditable="false">
+    <mat-divider [vertical]="true"></mat-divider>
+
+    <button mat-icon-button [matMenuTriggerFor]="menu" class="more-button">
+      <mat-icon>expand_more</mat-icon>
+    </button>
+  </div>
+</div>
+<mat-menu #menu="matMenu">
+  <button mat-menu-item *ngFor="let option of autcompleteData" (click)="onOptionSelect(option.username)">{{option.name}}</button>
+</mat-menu>
+
+<span>Output: {{value}}</span>
+<br>
+<span>Cursor index: {{cursorIndex}}</span>
+
+
+
+
+
+<mat-chip-list>
+</mat-chip-list>
