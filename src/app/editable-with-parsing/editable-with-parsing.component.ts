@@ -17,19 +17,23 @@ export class EditableWithParsingComponent implements OnInit {
 
   public readonly variableData = [
     { id: 0, name: "Machine name" },
-    { id: 1, name: "Weave product" },
-    { id: 2, name: "Actual temperature" },
+    { id: 1, name: "Actual temperature" },
+    { id: 2, name: "Actual RPM" },
   ];
 
   public data: {
     type: string;
     value: string;
+    newLine?: boolean;
   }[] = [
     { type: "text", value: "The tempature of" },
     { type: "chip", value: "Machine name" },
-    { type: "text", value: "is too high." },
-    { type: "chip", value: "Machine name" },
-    { type: "text", value: "is too high." },
+    { type: "text", value: "was" },
+    { type: "chip", value: "Actual temperature" },
+    { type: "text", value: "and was too high." },
+    { type: "text", value: "In addition, the RPM was ", newLine: true },
+    { type: "chip", value: "Actual RPM" },
+    { type: "text", value: "which is too fast." },
   ];
 
   public value = "";
@@ -39,10 +43,25 @@ export class EditableWithParsingComponent implements OnInit {
     this.getValue();
   }
 
-  public onInputChange(event: Event, index: number): void {
-    console.log();
-    this.data[index].value = (event.target as HTMLInputElement).innerText;
-    this.setCursorIndex(index);
+  public onKeyUp(event: KeyboardEvent): void {
+    if (event.key === "Enter") {
+      // event.preventDefault();
+      console.log("hi");
+    }
+  }
+
+  public onBlur(event: Event): void {
+    let textToEditIndex = -1;
+    [textToEditIndex] =
+      this.getTextIndexThatWillBeEditedAndGetLengthTillThatText();
+    textToEditIndex =
+      textToEditIndex === -1 ? this.data.length - 1 : textToEditIndex;
+
+    const newText = (event.target as HTMLInputElement).innerText
+      .split(/\n/g)
+      .filter((text: string) => text !== "cancel")[textToEditIndex];
+
+    this.data[textToEditIndex].value = newText;
   }
 
   public setCursorIndex(index: number, cursorOnChip: boolean = false): void {
@@ -54,7 +73,6 @@ export class EditableWithParsingComponent implements OnInit {
       ? textLength + 1
       : textLength + this.getCaretPosition();
 
-    console.log(this.cursorIndex);
     this.getValue();
   }
 
@@ -69,9 +87,10 @@ export class EditableWithParsingComponent implements OnInit {
     this.getValue();
   }
 
-  public onOptionSelect(option: string) {
-    const newVariable = `%{${option}}%`;
-
+  private getTextIndexThatWillBeEditedAndGetLengthTillThatText(): [
+    textIndexToSplit: number,
+    totalLength: number
+  ] {
     let totalTextLength = 0;
     let textToSplitIndex = -1;
     for (let i = 0; i < this.data.length; i++) {
@@ -82,6 +101,17 @@ export class EditableWithParsingComponent implements OnInit {
       }
       totalTextLength = totalTextLength + text.length;
     }
+
+    return [textToSplitIndex, totalTextLength];
+  }
+
+  public onOptionSelect(option: string) {
+    const newVariable = `%{${option}}%`;
+
+    let totalTextLength = 0;
+    let textToSplitIndex = -1;
+    [textToSplitIndex, totalTextLength] =
+      this.getTextIndexThatWillBeEditedAndGetLengthTillThatText();
 
     const newChip = { type: "chip", value: option };
     if (textToSplitIndex !== -1) {
@@ -95,7 +125,6 @@ export class EditableWithParsingComponent implements OnInit {
         type: "text",
         value: secondPart,
       });
-      console.log(text, "=", firstPart, "+", secondPart);
     } else {
       this.data.push(newChip);
       this.data.push({ type: "text", value: "" });
@@ -113,9 +142,9 @@ export class EditableWithParsingComponent implements OnInit {
 
   private getValue(): void {
     this.value = this.data
-      .map((data: { type: string; value: string }) => {
+      .map((data: { type: string; value: string; newLine?: boolean }) => {
         if (data.type === "text") {
-          return data.value;
+          return `${data.newLine ? "\\n" : ""}${data.value}`;
         } else {
           return `%{${this.getVariableIdByName(data.value)}}%`;
         }

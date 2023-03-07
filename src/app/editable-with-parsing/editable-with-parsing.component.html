@@ -1,11 +1,16 @@
 <div class="editable">
-  <div #editableDiv class="main" (click)="focusOnLastSpan()">
+  <div
+    #editableDiv
+    class="main"
+    (click)="focusOnLastSpan()"
+    (keyup)="onKeyUp($event)"
+    (blur)="onBlur($event)"
+    contenteditable="true"
+  >
     <ng-container *ngFor="let item of data; let itemIndex = index">
+      <div *ngIf="item.newLine"></div>
       <span
         *ngIf="item.type === 'text'; else chip"
-        contenteditable="true"
-        (input)="setCursorIndex(itemIndex)"
-        (blur)="onInputChange($event, itemIndex)"
         (click)="setCursorIndex(itemIndex); $event.stopPropagation()"
       >
         {{ item.value }}
