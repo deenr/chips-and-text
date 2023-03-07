@@ -3,7 +3,7 @@ import { Component } from "@angular/core";
 @Component({
   selector: "chips-autocomplete-example",
   templateUrl: "chips-autocomplete-example.html",
-  styleUrls: ["chips-autocomplete-example.css"]
+  styleUrls: ["chips-autocomplete-example.css"],
 })
 export class ChipsAutocompleteExample {}
 /**  Copyright 2020 Google LLC. All Rights Reserved.

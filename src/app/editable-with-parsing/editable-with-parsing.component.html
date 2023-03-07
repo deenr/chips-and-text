@@ -3,21 +3,48 @@
     #editable
     class="main"
     contenteditable="true"
-    (keyup)="onKeyUp()"
-    (click)="onClick()"
-  ></div>
+    (click)="setCursorIndex(data.length - 1)"
+  >
+    <ng-container *ngFor="let item of data; let itemIndex = index">
+      <span
+        *ngIf="item.type === 'text'; else chip"
+        (click)="setCursorIndex(itemIndex)"
+      >
+        {{ item.value }}
+      </span>
+      <ng-template #chip>
+        <mat-chip
+          contenteditable="false"
+          spellcheck="false"
+          tabindex="-1"
+          (focus)="setCursorIndex(itemIndex + 1)"
+        >
+          {{ item.value }}
+          <mat-icon matChipRemove (click)="removeChip(itemIndex)">
+            cancel</mat-icon
+          >
+        </mat-chip></ng-template
+      >
+    </ng-container>
+  </div>
 </div>
+
 <mat-menu #menu="matMenu">
   <button
     mat-menu-item
-    *ngFor="let option of autcompleteData"
-    (click)="onOptionSelect(option.id)"
+    *ngFor="let option of variableData"
+    (click)="onOptionSelect(option.name)"
   >
     {{ option.name }}
   </button>
 </mat-menu>
 
 <span>Output: {{ value }}</span>
+<br />
+<span>Formatted: {{ formattedValue }}</span>
+<br />
+
+<span>Data: {{ data | json }}</span>
 <br />
 <span>Cursor index: {{ cursorIndex }}</span>
 <br />
