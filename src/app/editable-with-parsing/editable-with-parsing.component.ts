@@ -12,10 +12,10 @@ import { MatMenuTrigger } from "@angular/material/menu";
   templateUrl: "./editable-with-parsing.component.html",
   styleUrls: ["./editable-with-parsing.component.css"],
 })
-export class EditableWithParsingComponent {
-  @ViewChild("editableDiv") public editableDiv: ElementRef;
+export class EditableWithParsingComponent implements OnInit {
+  @ViewChild("editableDiv") public readonly editableDiv: ElementRef;
 
-  public variableData = [
+  public readonly variableData = [
     { id: 0, name: "Machine name" },
     { id: 1, name: "Weave product" },
     { id: 2, name: "Actual temperature" },
@@ -32,14 +32,17 @@ export class EditableWithParsingComponent {
     { type: "text", value: "is too high." },
   ];
 
-  private value = "";
-  private cursorIndex = 0;
+  public value = "";
+  public cursorIndex = 0;
 
-  public onKeyUp(index: number): void {
-    this.data[index].value =
-      this.editableDiv.nativeElement.children[index].innerText;
-    this.setCursorIndex(index);
+  public ngOnInit(): void {
     this.getValue();
+  }
+
+  public onInputChange(event: Event, index: number): void {
+    console.log();
+    this.data[index].value = (event.target as HTMLInputElement).innerText;
+    this.setCursorIndex(index);
   }
 
   public setCursorIndex(index: number, cursorOnChip: boolean = false): void {
@@ -99,6 +102,13 @@ export class EditableWithParsingComponent {
     }
     this.getValue();
     this.cursorIndex = this.cursorIndex + newVariable.length;
+  }
+
+  public focusOnLastSpan(): void {
+    this.editableDiv.nativeElement.children[
+      this.editableDiv.nativeElement.children.length - 1
+    ].focus();
+    this.setCursorIndex(this.data.length, true);
   }
 
   private getValue(): void {

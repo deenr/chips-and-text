@@ -1,9 +1,12 @@
 <div class="editable">
-  <div #editableDiv class="main" contenteditable="true">
+  <div #editableDiv class="main" (click)="focusOnLastSpan()">
     <ng-container *ngFor="let item of data; let itemIndex = index">
       <span
         *ngIf="item.type === 'text'; else chip"
-        (click)="setCursorIndex(itemIndex)"
+        contenteditable="true"
+        (input)="setCursorIndex(itemIndex)"
+        (blur)="onInputChange($event, itemIndex)"
+        (click)="setCursorIndex(itemIndex); $event.stopPropagation()"
       >
         {{ item.value }}
       </span>
@@ -32,8 +35,11 @@
   </button>
 </mat-menu>
 
+<span>Value: {{ value }}</span>
+<br />
 <span>Data: {{ data | json }}</span>
 <br />
+<span>Cursor: {{ cursorIndex }}</span>
 <br />
 
 <button mat-raised-button [matMenuTriggerFor]="menu">Add variable</button>
