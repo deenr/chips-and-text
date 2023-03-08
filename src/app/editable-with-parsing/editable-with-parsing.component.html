@@ -1,18 +1,36 @@
 <div class="editable">
-  <div #editableDiv class="main" contenteditable="true">
+  <div
+    #editableDiv
+    class="main"
+    contenteditable="true"
+    (input)="setCursorIndex(lineIndex, textIndex)"
+    (blur)="onBlur($event)"
+    (click)="onClickOutsideText($event)"
+    (keydown.enter)="$event.preventDefault()"
+  >
     <ng-container *ngFor="let line of data; let lineIndex = index">
-      <div>
+      <div class="line">
         <ng-container *ngFor="let item of line; let itemIndex = index">
           <span
-            (click)="setCursorIndex(lineIndex, itemIndex)"
+            (click)="
+              setCursorIndex(lineIndex, itemIndex); $event.stopPropagation()
+            "
             *ngIf="item.type === 'text'; else chip"
           >
             {{ item.value }}
           </span>
           <ng-template #chip>
-            <mat-chip contenteditable="false">
+            <mat-chip
+              contenteditable="false"
+              (click)="setCursorIndex(lineIndex, itemIndex + 1, true)"
+            >
               {{ item.value }}
-              <mat-icon matChipRemove> cancel</mat-icon>
+              <mat-icon
+                matChipRemove
+                (click)="removeChip(lineIndex, itemIndex)"
+              >
+                cancel</mat-icon
+              >
             </mat-chip></ng-template
           >
         </ng-container>
@@ -35,7 +53,12 @@
 <br />
 <span>Data: {{ data | json }}</span>
 <br />
-<span>Cursor: {{ cursorIndex }}</span>
+<span>Cursor: {{ caretIndex }}</span>
+<br />
+<span
+  >Index: {{ textIndex }}, {{ lineIndex }},
+  {{ totalLengthTillBeginningOfText }}</span
+>
 <br />
 
 <button mat-raised-button [matMenuTriggerFor]="menu">Add variable</button>

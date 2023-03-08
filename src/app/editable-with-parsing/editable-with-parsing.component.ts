@@ -1,11 +1,10 @@
 import {
-  AfterViewInit,
   Component,
   ElementRef,
+  HostListener,
   OnInit,
   ViewChild,
 } from "@angular/core";
-import { MatMenuTrigger } from "@angular/material/menu";
 
 @Component({
   selector: "app-editable-with-parsing",
@@ -32,37 +31,34 @@ export class EditableWithParsingComponent implements OnInit {
       { type: "chip", value: "Actual temperature" },
       { type: "text", value: "and was too high." },
     ],
-    [
-      { type: "text", value: "In addition, the RPM was " },
-      { type: "chip", value: "Actual RPM" },
-      { type: "text", value: "which is too fast." },
-    ],
   ];
 
   public value = "";
-  public cursorIndex = 0;
+  public caretIndex = 0;
+  public textIndex = 0;
+  public lineIndex = 0;
+  public totalLengthTillBeginningOfText = 0;
 
   public ngOnInit(): void {
     this.getValue();
   }
 
-  public onKeyUp(event: KeyboardEvent): void {
-    if (event.key === "Enter") {
-      // event.preventDefault();
-      console.log("hi");
-    }
+  public onClickOutsideText(event: Event): void {
+    const lineIndex = this.data.length - 1;
+    this.setCursorIndex(lineIndex, this.data[lineIndex].length, true);
   }
 
   public onBlur(event: Event): void {
-    // let textToEditIndex = -1;
-    // [textToEditIndex] =
-    //   this.getTextIndexThatWillBeEditedAndGetLengthTillThatText();
-    // textToEditIndex =
-    //   textToEditIndex === -1 ? this.data.length - 1 : textToEditIndex;
-    // const newText = (event.target as HTMLInputElement).innerText
-    //   .split(/\n/g)
-    //   .filter((text: string) => text !== "cancel")[textToEditIndex];
-    // this.data[textToEditIndex].value = newText;
+    const newText = (
+      (event.target as HTMLInputElement).children[
+        this.lineIndex
+      ] as HTMLInputElement
+    ).innerText
+      .split(/\n/g)
+      .filter((text: string) => text !== "cancel")[this.textIndex];
+    this.data[this.lineIndex][this.textIndex].value = newText;
+
+    this.getValue();
   }
 
   public setCursorIndex(
@@ -72,84 +68,91 @@ export class EditableWithParsingComponent implements OnInit {
   ): void {
     let textLength = 0;
 
-    for (let i = 0; i < lineIndex; i++) {
+    for (let index = 0; index < lineIndex; index++) {
       textLength =
         textLength +
-        this.data[i]
+        this.data[index]
           .map((text: { type: string; value: string }) => text.value.length)
           .reduce(
             (previousValue: number, currentValue: number) =>
               previousValue + currentValue
           );
     }
-    for (let i = 0; i < itemIndex; i++) {
-      textLength = textLength + this.data[lineIndex][i].value.length;
-    }
 
-    this.cursorIndex = cursorOnChip
+    for (let index = 0; index < itemIndex; index++) {
+      textLength = textLength + this.data[lineIndex][index].value.length;
+    }
+    this.caretIndex = cursorOnChip
       ? textLength + 1
       : textLength + this.getCaretPosition();
 
+    this.getTextAndLineIndexAtCaretPosition();
     this.getValue();
   }
 
-  public removeChip(index: number): void {
-    // if (this.data[index - 1]) {
-    //   this.data[index - 1].value = `${this.data[index - 1]?.value} ${
-    //     this.data[index + 1]?.value
-    //   }`;
-    //   this.data.splice(index + 1, 1);
-    // }
-    // this.data.splice(index, 1);
-    // this.getValue();
+  public removeChip(lineIndex: number, itemIndex: number): void {
+    const textBeforeChip = this.data[lineIndex][itemIndex - 1];
+    const textAfterChip = this.data[lineIndex][itemIndex + 1];
+    if (textBeforeChip) {
+      textBeforeChip.value = `${textBeforeChip?.value} ${textAfterChip?.value}`;
+      this.data[lineIndex].splice(itemIndex + 1, 1);
+    }
+    this.data[lineIndex].splice(itemIndex, 1);
+    this.getValue();
   }
 
-  private getTextAndLineIndexAndTotalCharLengthAtCaretPosition(): [
-    textIndex: number,
-    lineIndex: number,
-    totalTextLengthBeforeCaret: number
-  ] {
-    let totalLength = 0;
-    let textIndex = -1;
-    let lineIndex = -1;
-    lineloop: for (let i = 0; i < this.data.length; i++) {
-      for (let j = 0; j < this.data[i].length; j++) {
-        if (this.cursorIndex < totalLength + this.data[i][j].value.length) {
-          lineIndex = i;
-          textIndex = j;
+  private getTextAndLineIndexAtCaretPosition(): void {
+    let totalLength = 1;
+    lineloop: for (
+      let lineIndex = 0;
+      lineIndex < this.data.length;
+      lineIndex++
+    ) {
+      for (
+        let textIndex = 0;
+        textIndex < this.data[lineIndex].length;
+        textIndex++
+      ) {
+        let text = this.data[lineIndex][textIndex].value;
+        console.log(this.caretIndex, "<", totalLength, "+", text.length);
+        console.log(text);
+        if (this.caretIndex < totalLength + text.length + 1) {
+          this.lineIndex = lineIndex;
+          this.textIndex = textIndex;
+          this.totalLengthTillBeginningOfText = totalLength;
           break lineloop;
+        } else if (
+          this.caretIndex === totalLength + text.length &&
+          textIndex === this.data[lineIndex].length - 1
+        ) {
+          this.lineIndex = lineIndex;
+          this.textIndex = textIndex;
+          this.totalLengthTillBeginningOfText = totalLength;
         }
-        totalLength = totalLength + this.data[i][j].value.length;
+        totalLength = totalLength + text.length;
       }
     }
-    console.log(textIndex, lineIndex, totalLength);
-    return [textIndex, lineIndex, totalLength];
   }
 
   public onOptionSelect(option: string) {
-    let totalTextLength = 0;
-    let textToSplitIndex = -1;
-    let lineIndex = -1;
-    [textToSplitIndex, lineIndex, totalTextLength] =
-      this.getTextAndLineIndexAndTotalCharLengthAtCaretPosition();
+    const indexToSplitText =
+      this.caretIndex - this.totalLengthTillBeginningOfText;
+    const text = this.data[this.lineIndex][this.textIndex].value;
+    const firstPart = text.slice(0, indexToSplitText);
+    const secondPart = text.slice(indexToSplitText, text.length);
+    this.data[this.lineIndex][this.textIndex].value = firstPart;
+    this.data[this.lineIndex].splice(this.textIndex + 1, 0, {
+      type: "chip",
+      value: option,
+    });
+    this.data[this.lineIndex].splice(this.textIndex + 2, 0, {
+      type: "text",
+      value: secondPart,
+    });
 
-    const newChip = { type: "chip", value: option };
-    if (textToSplitIndex !== -1 && lineIndex !== -1) {
-      const indexToSplitText = this.cursorIndex - totalTextLength - 1;
-      const text = this.data[lineIndex][textToSplitIndex].value;
-      console.log(text);
-      const firstPart = text.slice(0, indexToSplitText);
-      const secondPart = text.slice(indexToSplitText, text.length);
-      this.data[lineIndex][textToSplitIndex].value = firstPart;
-      this.data[lineIndex].splice(textToSplitIndex + 1, 0, newChip);
-      this.data[lineIndex].splice(textToSplitIndex + 2, 0, {
-        type: "text",
-        value: secondPart,
-      });
-    } else {
-      this.data[this.data.length - 1].push(newChip);
-      this.data[this.data.length - 1].push({ type: "text", value: "" });
-    }
+    const newVariable = `%{${option}}%`;
+    this.caretIndex = this.caretIndex + newVariable.length;
+
     this.getValue();
   }
 
