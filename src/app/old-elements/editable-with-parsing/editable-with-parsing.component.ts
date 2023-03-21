@@ -43,7 +43,7 @@ export class EditableWithParsingComponent implements OnInit {
     this.getValue();
   }
 
-  public onClickOutsideText(event: Event): void {
+  public onClickOutsideText(): void {
     const lineIndex = this.data.length - 1;
     this.setCursorIndex(lineIndex, this.data[lineIndex].length, true);
   }

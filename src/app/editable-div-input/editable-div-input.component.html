@@ -1,0 +1,14 @@
+<div #editable class="editable" contenteditable="true" (click)="getCaretPosition()" (blur)="onBlur()"></div>
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item *ngFor="let option of variableData" (click)="onOptionSelect(option.name)">
+    {{ option.name }}
+  </button>
+</mat-menu>
+<button mat-raised-button [matMenuTriggerFor]="menu">Add variable</button>
+<br />
+<br />
+<br />
+caretIndex: {{ caretIndex }}
+<br />
+value: {{ value }}

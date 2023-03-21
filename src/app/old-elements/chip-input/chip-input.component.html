@@ -1,0 +1,35 @@
+<div class="editable">
+  <div #editableDiv class="main" contenteditable="true" (blur)="onBlur($event)" (keyup)="onKeyUp($event)">
+    <ng-container *ngFor="let line of data; let lineIndex = index">
+      <div class="line">
+        <div *ngFor="let item of line; let itemIndex = index">
+          <span *ngIf="item.type === textType.TEXT; else chip" (click)="setCaretIndex(itemIndex, textType.TEXT)">
+            {{ item.value }}
+          </span>
+          <ng-template #chip>
+            <div contenteditable="false" (click)="setCaretIndex(itemIndex, textType.CHIP)">
+              <mat-chip>
+                {{ item.value }}
+                <mat-icon matChipRemove (click)="removeChip(itemIndex)">cancel</mat-icon>
+              </mat-chip>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item *ngFor="let option of variableData" (click)="onOptionSelect(option.name)">
+    {{ option.name }}
+  </button>
+</mat-menu>
+
+<button mat-raised-button [matMenuTriggerFor]="menu">Add variable</button>
+
+<mat-chip-list> </mat-chip-list>
+<br />
+{{ data | json }}
+<br /><br />
+caret:{{ caretIndex }} <br />text:{{ textIndex }}<br />

@@ -1,0 +1,23 @@
+:host {
+  .editable {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    margin: 20px;
+    display: flex;
+    width: fit-content;
+    max-width: 1000px;
+    margin-top: 20vh;
+  }
+
+  .line {
+    display: inline-block;
+
+    div {
+      display: inline-block;
+
+      span {
+        padding: 7px 5px;
+      }
+    }
+  }
+}

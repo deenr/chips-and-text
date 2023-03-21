@@ -5,7 +5,7 @@
     contenteditable="true"
     (input)="setCursorIndex(lineIndex, textIndex)"
     (blur)="onBlur($event)"
-    (click)="onClickOutsideText($event)"
+    (click)="onClickOutsideText()"
     (keydown.enter)="$event.preventDefault()"
   >
     <ng-container *ngFor="let line of data; let lineIndex = index">

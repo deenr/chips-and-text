@@ -1,0 +1,32 @@
+<div class="editable">
+  <div #editableDiv class="main" contenteditable="true" (input)="setCursorIndex(lineIndex, textIndex)" (blur)="onBlur($event)" (click)="onClickOutsideText($event)" (keyup)="onKeyUp($event)">
+    <ng-container *ngFor="let line of data; let lineIndex = index">
+      <div class="line">
+        <ng-container *ngFor="let item of line; let itemIndex = index">
+          <span (click)="setCursorIndex(lineIndex, itemIndex); $event.stopPropagation()" *ngIf="item.type === 'text'; else chip">
+            {{ item.value }}
+          </span>
+          <ng-template #chip>
+            <div class="chip" (click)="setCursorIndex(lineIndex, itemIndex + 1, true)">
+              <mat-chip contenteditable="false">
+                {{ item.value }}
+                <mat-icon svgIcon="erase" matChipRemove (click)="removeChip(lineIndex, itemIndex)"></mat-icon>
+              </mat-chip>
+            </div>
+          </ng-template>
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item *ngFor="let option of variableData" (click)="onOptionSelect(option.name)">
+    {{ option.name }}
+  </button>
+</mat-menu>
+{{ caretIndex }}
+
+<button mat-raised-button [matMenuTriggerFor]="menu">Add variable</button>
+
+<mat-chip-list> </mat-chip-list>
